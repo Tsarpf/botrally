@@ -22,7 +22,10 @@ let carSizeY = 30
 const tileSize = 50
 const mapSize = 10
 
-const updateSpeed = 10
+const updateSpeed = 50
+
+const carSpeed = 2.0
+const rotationSpeed = Math.PI / 60
 
 let carImg
 
@@ -257,7 +260,7 @@ function getCarSpeed(xPos, yPos, mapSize) {
   const yTile = ~~(yPos / 50)
   const idx = getIdx(xTile, yTile, mapSize)
   const tile = tileGrid[idx]
-  return tile ? 0.7 : 0.35
+  return tile ? carSpeed : carSpeed / 2
 }
 
 function updateCar() {
@@ -272,7 +275,6 @@ function drawCar(carSpeed) {
 
   car_context.translate(xPos, yPos)
 
-  let rotationSpeed = Math.PI / 125
   if(leftDown)
   {
     rotation += rotationSpeed
