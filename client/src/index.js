@@ -16,8 +16,12 @@ const map_context = map_canvas.getContext("2d");
 
 const car_canvas = document.getElementById("car");
 const car_context = car_canvas.getContext("2d");
+let carSizeX = 50
+let carSizeY = 30
 
 const tileSize = 50
+
+const updateSpeed = 10
 
 let carImg
 
@@ -125,7 +129,6 @@ const map = [
 ]
 
 function grid() {
-
   const sizeX = 501
   const sizeY = 501
   for (var x = 0.5; x < sizeX; x += 50) {
@@ -143,30 +146,6 @@ function grid() {
 
   map_context.strokeStyle = "#ddd";
   map_context.stroke();
-
-  //map_context.beginPath()
-  //map_context.rect(0,0,50,50)
-  //map_context.fillStyle = "blue"
-  //map_context.fill()
-
-  //map_context.beginPath()
-  //map_context.rect(450,450,500,500)
-  //map_context.fillStyle = "blue"
-  //map_context.fill()
-
-  //// draw a fucking map
-  //for(var x = 50; x < sizeX; x+= 50) {
-  //    map_context.beginPath()
-  //    map_context.rect(x,x-50,50,50)
-  //    map_context.fillStyle = "green"
-  //    map_context.fill()
-  //}
-  //for(var x = 50; x < sizeX; x+= 50) {
-  //    map_context.beginPath()
-  //    map_context.rect(x+50,x-50,50,50)
-  //    map_context.fillStyle = "green"
-  //    map_context.fill()
-  //}
 }
 
 function drawRoadTile(tile) {
@@ -207,45 +186,90 @@ function drawTiles(tiles) {
   })
 }
 
-function drawMap() {
+function initialize() {
   //TODO: get the map from somewhere
   drawTiles(map)
+  initCar()
 }
 
-function drawCar() {
-  console.log(carImgPath)
-  //context.drawImage(carImg, 0, 0);
-
+function initCar() {
   carImg = new Image()
   carImg.src = carImgPath
   carImg.onload = () => {
     car_context.drawImage(carImg, 0, 0, 50, 30);
-    setInterval(updateCar, 10)
+    car_context.translate(carSizeX / 2, carSizeY / 2)
+    setInterval(updateCar, updateSpeed)
+  }
+}
+
+let leftDown = false
+let rightDown = false
+function checkKeyDown(e) {
+  var code = e.keyCode;
+  switch (code) {
+    case 37:
+      console.log("Left")
+      leftDown = true
+      break;
+    case 39:
+      console.log("Right")
+      rightDown = true
+      break
+    default: console.log(code);
+  }
+}
+function checkKeyUp(e) {
+  var code = e.keyCode;
+  switch (code) {
+    case 37:
+      console.log("Left")
+      leftDown = false
+      break;
+    case 39:
+      console.log("Right")
+      rightDown = false
+      break
+    default: console.log(code);
   }
 }
 
 let xPos = 0
 let yPos = 0
+
+let rotation = 0
 function updateCar() {
-  xPos += 1
-  yPos += 1
-  car_context.clearRect(0, 0, car_canvas.width, car_canvas.height);  // clear canvas
-  car_context.drawImage(carImg, xPos, yPos, 50, 30);
+
+  // Always moving
+  xPos += Math.sin(rotation)
+  yPos += Math.cos(rotation)
+  drawCar()
 }
 
-function checkKeys(e) {
-  var code = e.keyCode;
-  switch (code) {
-    case 37: console.log("Left"); break; //Left key
-    case 38: console.log("Up"); break; //Up key
-    case 39: console.log("Right"); break; //Right key
-    case 40: console.log("Down"); break; //Down key
-    default: console.log(code); //Everything else
+function drawCar() {
+  car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width, car_canvas.height);  // clear canvas
+
+  let rotationSpeed = Math.PI / 100
+  if(leftDown)
+  {
+    rotation += rotationSpeed
+    car_context.rotate(-rotationSpeed);
   }
+
+  if(rightDown)
+  {
+    rotation -= rotationSpeed
+    car_context.rotate(rotationSpeed);
+  }
+
+  const xSpeed = Math.sin(rotation)
+  const ySpeed = Math.cos(rotation)
+  car_context.translate(1, 0)
+
+  car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
 }
 
-window.addEventListener('keydown', checkKeys, false)
+window.addEventListener('keydown', checkKeyDown, false)
+window.addEventListener('keyup', checkKeyUp, false)
 
 grid()
-drawMap()
-drawCar()
+initialize()
