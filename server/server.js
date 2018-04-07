@@ -2,8 +2,6 @@ let app = require('express')();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 
-let map = require('./placeholder-map.js').map
-console.log(map)
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
