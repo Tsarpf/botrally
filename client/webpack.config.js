@@ -1,20 +1,26 @@
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
+const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
   template: __dirname + '/src/index.html',
   filename: 'index.html',
   inject: 'body'
 });
 
-var ExtractTextPluginConfig = new ExtractTextPlugin('style.css');
+const ExtractTextPluginConfig = new ExtractTextPlugin('style.css');
 
-var entrypoint = process.env.npm_lifecycle_event === 'dev' ?
+const entrypoint = process.env.npm_lifecycle_event === 'dev' ?
   'webpack-dev-server/client?http://localhost:8080' :
   './src/index.js';
 
 module.exports = {
   entry: entrypoint,
+  devServer: {
+    contentBase: path.join(__dirname, "../dist/"),
+    port: 9000
+  },
   output: {
     path: __dirname + '/dist',
     filename: 'bundle.js'
@@ -33,8 +39,28 @@ module.exports = {
         test: /\.scss$/,
         include: __dirname + '/src',
         loader: ExtractTextPlugin.extract('css!sass')
+      },
+      {
+        test: /\.(gif|svg|jpg|jpeg|png)$/,
+        loader: "file-loader",
+      }
+    ],
+    rules: [
+      {
+          test: /\.(png|jp(e*)g|svg)$/,
+          use: [{
+              loader: 'url-loader',
+              options: {
+                  limit: 8000, // Convert images < 8kb to base64 strings
+                  name: 'img/[hash]-[name].[ext]'
+              }
+          }]
       }
     ]
   },
-  plugins: [HtmlWebpackPluginConfig, ExtractTextPluginConfig]
+  plugins: [HtmlWebpackPluginConfig, ExtractTextPluginConfig,
+    new CopyWebpackPlugin([
+      { from: 'src/img', to: 'images' }
+    ])
+  ]
 }
