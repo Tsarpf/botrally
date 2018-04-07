@@ -239,33 +239,35 @@ let yPos = 0
 let rotation = 0
 function updateCar() {
 
-  // Always moving
-  xPos += Math.sin(rotation)
-  yPos += Math.cos(rotation)
   drawCar()
 }
 
 function drawCar() {
-  car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width, car_canvas.height);  // clear canvas
+  car_context.save()
 
-  let rotationSpeed = Math.PI / 100
+  car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
+
+  car_context.translate(xPos, yPos)
+
+  let rotationSpeed = Math.PI / 125
   if(leftDown)
   {
     rotation += rotationSpeed
-    car_context.rotate(-rotationSpeed);
   }
-
   if(rightDown)
   {
     rotation -= rotationSpeed
-    car_context.rotate(rotationSpeed);
   }
+    car_context.rotate(-rotation);
 
-  const xSpeed = Math.sin(rotation)
-  const ySpeed = Math.cos(rotation)
-  car_context.translate(1, 0)
+  const xSpeed = Math.sin(rotation) / 2
+  const ySpeed = Math.cos(rotation) / 2
+  xPos += ySpeed
+  yPos -= xSpeed
 
   car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
+
+  car_context.restore()
 }
 
 window.addEventListener('keydown', checkKeyDown, false)
