@@ -20,12 +20,14 @@ let carSizeX = 50
 let carSizeY = 30
 
 const tileSize = 50
+const mapSize = 10
 
 const updateSpeed = 10
 
 let carImg
 
-const map = [
+// will be transmitted from server in the future, hence the stupid name
+const paramMap = [
   {
     x: 0,
     y: 0,
@@ -128,7 +130,7 @@ const map = [
   },
 ]
 
-function grid() {
+function drawBackgroundGrid() {
   const sizeX = 501
   const sizeY = 501
   for (var x = 0.5; x < sizeX; x += 50) {
@@ -186,8 +188,25 @@ function drawTiles(tiles) {
   })
 }
 
-function initialize() {
-  //TODO: get the map from somewhere
+function getIdx(x, y, size) {
+  return y * size +x
+}
+
+function initializeGrid(map, size) {
+  let grid = new Array(mapSize)
+  map.forEach(tile => {
+    grid[getIdx(tile.x, tile.y, size)] = tile
+  })
+  return grid
+}
+
+let tileGrid
+function initialize(mapSize, tileSize, map) {
+  let grid = initializeGrid(map, mapSize)
+
+  //lets just make it 'global' for now
+  tileGrid = grid
+
   drawTiles(map)
   initCar()
 }
@@ -208,11 +227,9 @@ function checkKeyDown(e) {
   var code = e.keyCode;
   switch (code) {
     case 37:
-      console.log("Left")
       leftDown = true
       break;
     case 39:
-      console.log("Right")
       rightDown = true
       break
     default: console.log(code);
@@ -222,11 +239,9 @@ function checkKeyUp(e) {
   var code = e.keyCode;
   switch (code) {
     case 37:
-      console.log("Left")
       leftDown = false
       break;
     case 39:
-      console.log("Right")
       rightDown = false
       break
     default: console.log(code);
@@ -235,14 +250,22 @@ function checkKeyUp(e) {
 
 let xPos = 0
 let yPos = 0
-
 let rotation = 0
-function updateCar() {
 
-  drawCar()
+function getCarSpeed(xPos, yPos, mapSize) {
+  const xTile = ~~(xPos / 50)
+  const yTile = ~~(yPos / 50)
+  const idx = getIdx(xTile, yTile, mapSize)
+  const tile = tileGrid[idx]
+  return tile ? 0.7 : 0.35
 }
 
-function drawCar() {
+function updateCar() {
+  let speed = getCarSpeed(xPos, yPos, mapSize)
+  drawCar(speed)
+}
+
+function drawCar(carSpeed) {
   car_context.save()
 
   car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
@@ -258,10 +281,10 @@ function drawCar() {
   {
     rotation -= rotationSpeed
   }
-    car_context.rotate(-rotation);
+  car_context.rotate(-rotation);
 
-  const xSpeed = Math.sin(rotation) / 2
-  const ySpeed = Math.cos(rotation) / 2
+  const xSpeed = Math.sin(rotation) * carSpeed
+  const ySpeed = Math.cos(rotation) * carSpeed
   xPos += ySpeed
   yPos -= xSpeed
 
@@ -273,5 +296,5 @@ function drawCar() {
 window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
 
-grid()
-initialize()
+drawBackgroundGrid()
+initialize(mapSize, tileSize, paramMap)
