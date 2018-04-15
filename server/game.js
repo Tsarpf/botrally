@@ -1,11 +1,5 @@
-const client = require('./client.js')
+const Car = require('./car.js')
 const presetMap = require('./placeholder-map.js').map
-console.log(map)
-
-// Set these per client
-//let xPos = 0
-//let yPos = 0
-//let rotation = 0
 
 const mapSize = 10
 const updateSpeed = 50
@@ -25,18 +19,11 @@ function getIdx(x, y, size) {
   return y * size +x
 }
 
-function getClientInputForFrame(client) {
-  // NYI
-  return {leftDown: true, rightDown: false}
-}
-
-
 function moveCar(car, carSpeed, leftDown, rightDown) {
-  // TODO replace with own translation thang
-  //car_context.translate(xPos, yPos)
+  let rotation = car.rotation
+  let xPos = car.x
+  let yPos = car.y
 
-  // TODO keep rotation
-  let rotationSpeed = Math.PI / 125
   if(leftDown)
   {
     rotation += rotationSpeed
@@ -45,16 +32,17 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   {
     rotation -= rotationSpeed
   }
-  car_context.rotate(-rotation);
+  car.setRotation(-rotation);
 
   const xSpeed = Math.sin(rotation) * carSpeed
   const ySpeed = Math.cos(rotation) * carSpeed
   xPos += ySpeed
   yPos -= xSpeed
 
-  car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
+  car.setPosition(xPos, yPos)
 
-  car_context.restore()
+  //car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
+  //car_context.restore()
 }
 
 function generateMap() {
@@ -72,13 +60,15 @@ function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
 
 function updateCar(client, tileGrid) {
   let keys = client.getInputForFrame()
-  let speed = getCarSpeed(client.car.x, client.car.y, mapSize, tileGrid)
+  let car = client.car
+  let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid)
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
-const updateAllCars = tileGrid => clients => {
+const updateAllCars = (tileGrid, clients) => () => {
   clients.forEach(client => {
     updateCar(client, tileGrid)
+    client.sendState(client.car)
   })
 }
 
@@ -86,9 +76,14 @@ function newGame(clients) {
   let newMap = generateMap()
   let grid = initializeGrid(newMap, mapSize)
   clients.forEach(client => {
+    client.car = Car({x: 0, y: 0}, 0)
     client.sendNewMap(newMap)
   })
 
   // NYI end game loop
-  const key = setInterval(updateAllCars(grid), updateSpeed)
+  const key = setInterval(updateAllCars(grid, clients), updateSpeed)
+}
+
+module.exports = {
+  newGame
 }
