@@ -1,11 +1,3 @@
-// car.setPosition()
-// car.setRotation()
-
-// car.rotation
-// car.xPos
-// car.jPos
-
-
 const car = (startPosition, startRotation) => {
     return {
         rotation: startRotation,

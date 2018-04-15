@@ -5,7 +5,7 @@ let client = socket => {
     })
     return {
         socket,
-        sendNewMap,
+        sendNewGame,
         getInputForFrame,
         inputQueue,
         sendState
@@ -22,8 +22,8 @@ function getInputForFrame() {
     // NYI wait for input
 }
 
-function sendNewMap(map) {
-    this.socket.emit('map', map)
+function sendNewGame(newGameData) {
+    this.socket.emit('new game', newGameData)
 }
 
 function sendState(state) {

@@ -2,10 +2,12 @@ const Car = require('./car.js')
 const presetMap = require('./placeholder-map.js').map
 
 const mapSize = 10
-const updateSpeed = 50
+const tickrate = 50
+const tileSize = 50
 
 const carSpeed = 2.0
 const rotationSpeed = Math.PI / 60
+
 
 function initializeGrid(map, size) {
   let grid = new Array(mapSize)
@@ -32,7 +34,7 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   {
     rotation -= rotationSpeed
   }
-  car.setRotation(-rotation);
+  car.setRotation(rotation);
 
   const xSpeed = Math.sin(rotation) * carSpeed
   const ySpeed = Math.cos(rotation) * carSpeed
@@ -77,11 +79,16 @@ function newGame(clients) {
   let grid = initializeGrid(newMap, mapSize)
   clients.forEach(client => {
     client.car = Car({x: 0, y: 0}, 0)
-    client.sendNewMap(newMap)
+    client.sendNewGame({
+      map: newMap,
+      tickrate,
+      tileSize,
+      mapSize
+    })
   })
 
   // NYI end game loop
-  const key = setInterval(updateAllCars(grid, clients), updateSpeed)
+  const key = setInterval(updateAllCars(grid, clients), tickrate)
 }
 
 module.exports = {
