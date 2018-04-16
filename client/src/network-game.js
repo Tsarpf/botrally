@@ -24,6 +24,7 @@ let carSizeY = 30
 let tileSize
 let mapSize
 let tickrate
+let carStartPos
 const carSpeed = 2.0
 const rotationSpeed = Math.PI / 60
 let carImg
@@ -100,15 +101,17 @@ function initializeGrid(map, size) {
   return grid
 }
 
-function initialize(mapSize, tileSize, map, trate) {
+function initialize(mapSize, tSize, map, trate, carSize, carStartPos) {
   stateBuffer = []
   tickrate = trate
+  tileSize = tSize
+  carSizeX = carSize.x
+  carSizeY = carSize.y
   let grid = initializeGrid(map, mapSize)
 
   //lets just make it 'global' for now. ugly af
   tileGrid = grid
 
-  console.log(map)
   drawTiles(map)
   initCar()
 
@@ -119,8 +122,8 @@ function initCar() {
   carImg = new Image()
   carImg.src = carImgPath
   carImg.onload = () => {
-    car_context.drawImage(carImg, 0, 0, 50, 30);
-    car_context.translate(carSizeX / 2, carSizeY / 2)
+    car_context.drawImage(carImg, 0, 0, carSizeX, carSizeY);
+    car_context.translate(carStartPos.x, carStartPos.y)
   }
 }
 
@@ -192,8 +195,8 @@ window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
 drawBackgroundGrid()
 
-socket.on('new game', ({tickrate, map, mapSize, tileSize}) => {
-  initialize(mapSize, tileSize, map, tickrate)
+socket.on('new game', ({tickrate, map, mapSize, tileSize, carSize, carStartPos}) => {
+  initialize(mapSize, tileSize, map, tickrate, carSize, carStartPos)
 })
 
 socket.on('state', car => {

@@ -2,11 +2,15 @@ const Car = require('./car.js')
 const presetMap = require('./placeholder-map.js').map
 
 const mapSize = 10
-const tickrate = 50
+const tickrate = 30
 const tileSize = 50
+let carSize = {
+  x: 50,
+  y: 30
+}
 
-const carSpeed = 2.0
-const rotationSpeed = Math.PI / 60
+const carSpeedMultiplier = 2.5
+const rotationSpeed = Math.PI / 30
 
 
 function initializeGrid(map, size) {
@@ -63,7 +67,7 @@ function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
 function updateCar(client, tileGrid) {
   let keys = client.getInputForFrame()
   let car = client.car
-  let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid)
+  let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
@@ -78,12 +82,15 @@ function newGame(clients) {
   let newMap = generateMap()
   let grid = initializeGrid(newMap, mapSize)
   clients.forEach(client => {
-    client.car = Car({x: 0, y: 0}, 0)
+    let carStartPos = {x: carSize.x / 2, y: carSize.y / 2}
+    client.car = Car(carStartPos, 0)
     client.sendNewGame({
       map: newMap,
       tickrate,
       tileSize,
-      mapSize
+      mapSize,
+      carSize,
+      carStartPos
     })
   })
 
