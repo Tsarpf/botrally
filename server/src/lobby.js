@@ -15,7 +15,9 @@ function checkIfShouldStartGame() {
 
 function startNewGame(numPlayers) {
     let clients = waitingClients.splice(0, numPlayers)
+
     console.log('starting new game with clients: ', clients, numPlayers)
+
     newGame(clients)
 }
 

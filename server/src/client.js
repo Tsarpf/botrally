@@ -8,7 +8,8 @@ let client = socket => {
         sendNewGame,
         getInputForFrame,
         inputQueue,
-        sendState
+        sendState,
+        type: 'human'
     }
 }
 

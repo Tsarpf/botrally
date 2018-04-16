@@ -1,3 +1,6 @@
+const testBotSource = require('./test-bot-source.js').bot
+const botClient = require('./bot-client.js')
+
 const Car = require('./car.js')
 const presetMap = require('./placeholder-map.js').map
 
@@ -54,32 +57,44 @@ function generateMap() {
 }
 
 function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
-  const xTile = ~~(xPos / 50)
-  const yTile = ~~(yPos / 50)
+  const xTile = ~~(xPos / tileSize)
+  const yTile = ~~(yPos / tileSize)
   const idx = getIdx(xTile, yTile, mapSize)
   const tile = tileGrid[idx]
   return tile ? 0.7 : 0.35
 }
 
-function updateCar(client, tileGrid) {
-  let keys = client.getInputForFrame()
+function updateCar(client, tileGrid, map) {
+  let keys = client.getInputForFrame(client.car, map, tileGrid)
   let car = client.car
   let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
-const updateAllCars = (tileGrid, clients) => () => {
+const updateAllCars = (tileGrid, clients, map) => () => {
+  // tad wasteful to build the array on each frame, but whatever
   let cars = []
   clients.forEach(client => {
-    updateCar(client, tileGrid)
+    updateCar(client, tileGrid, map)
     cars.push(client.car)
   })
   clients.forEach(client => client.sendState(cars))
 }
 
 function newGame(clients) {
+
   let newMap = generateMap()
   let grid = initializeGrid(newMap, mapSize)
+
+  let settings = {
+    mapSize,
+    tileSize
+  }
+  const botSource = testBotSource(settings)
+  const bot = botClient(botSource)
+  // lets add one bot player for fun
+  clients.push(bot)
+
   clients.forEach(client => {
     let carStartPos = {x: carSize.x / 2, y: carSize.y / 2}
     client.car = Car(carStartPos, 0)
@@ -94,7 +109,7 @@ function newGame(clients) {
   })
 
   // NYI end game loop
-  const key = setInterval(updateAllCars(grid, clients), tickrate)
+  const key = setInterval(updateAllCars(grid, clients, newMap), tickrate)
 }
 
 module.exports = {
