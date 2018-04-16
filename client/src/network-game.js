@@ -101,12 +101,13 @@ function initializeGrid(map, size) {
   return grid
 }
 
-function initialize(mapSize, tSize, map, trate, carSize, carStartPos) {
+function initialize(mapSize, tSize, map, trate, carSize, carSPos) {
   stateBuffer = []
   tickrate = trate
   tileSize = tSize
   carSizeX = carSize.x
   carSizeY = carSize.y
+  carStartPos = carSPos
   let grid = initializeGrid(map, mapSize)
 
   //lets just make it 'global' for now. ugly af
@@ -163,14 +164,14 @@ function updateCar() {
   socket.emit('input', { leftDown, rightDown })
   let state = stateBuffer.pop()
   if (state) {
-    drawCar(state)
+    car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
+    state.forEach(car => drawCar(car))
   }
 }
 
 function drawCar(car) {
   car_context.save()
 
-  car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
 
   let xPos = car.x
   let yPos = car.y

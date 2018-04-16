@@ -46,9 +46,6 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   yPos -= xSpeed
 
   car.setPosition(xPos, yPos)
-
-  //car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
-  //car_context.restore()
 }
 
 function generateMap() {
@@ -72,10 +69,12 @@ function updateCar(client, tileGrid) {
 }
 
 const updateAllCars = (tileGrid, clients) => () => {
+  let cars = []
   clients.forEach(client => {
     updateCar(client, tileGrid)
-    client.sendState(client.car)
+    cars.push(client.car)
   })
+  clients.forEach(client => client.sendState(cars))
 }
 
 function newGame(clients) {
@@ -90,7 +89,7 @@ function newGame(clients) {
       tileSize,
       mapSize,
       carSize,
-      carStartPos
+      carStartPos,
     })
   })
 

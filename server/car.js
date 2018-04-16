@@ -1,5 +1,7 @@
+let carIdx = 0
 const car = (startPosition, startRotation) => {
     return {
+        idx: carIdx++,
         rotation: startRotation,
         x: startPosition.x,
         y: startPosition.y,
