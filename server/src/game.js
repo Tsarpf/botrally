@@ -1,4 +1,6 @@
+const fs = require('fs')
 const testBotSource = require('./test-bot-source.js')
+const testSandboxSource = fs.readFileSync('./src/sandbox-test-bot.js', 'utf8')
 const botClient = require('./bot-client.js')
 
 const Car = require('./car.js')
@@ -14,7 +16,6 @@ let carSize = {
 
 const carSpeedMultiplier = 2.5
 const rotationSpeed = Math.PI / 30
-
 
 function initializeGrid(map, size) {
   let grid = new Array(mapSize)
@@ -154,7 +155,7 @@ function fixBotShortHands(client, keys) {
   return keys
 }
 
-function updateCar(client, tileGrid, map, settings, movingAllowed) {
+async function updateCar(client, tileGrid, map, settings, movingAllowed) {
   let xt = tile(client.car.x, settings.tileSize)
   let yt = tile(client.car.y, settings.tileSize)
   let t = getTile(xt, yt, tileGrid, settings.mapSize)
@@ -164,7 +165,13 @@ function updateCar(client, tileGrid, map, settings, movingAllowed) {
   let nt = nextAndDeg.nt
   let degNext = nextAndDeg.degNext
 
-  let keys = fixBotShortHands(client, client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext))
+  let input
+  try {
+    input = await client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext)
+  } catch(e) {
+    console.log('failed to get input', e)
+  }
+  let keys = fixBotShortHands(client, input)
 
   let car = client.car
   let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
@@ -206,14 +213,16 @@ function newGame(clients, cb) {
     } 
   }
 
-  let newMap = generateMap()
+  let newMap = presetMap//generateMap()
   let grid = initializeGrid(newMap, mapSize)
 
   let settings = {
     mapSize,
     tileSize
   }
-  const bot = botClient(testBotSource)
+  const bot = botClient(testSandboxSource)
+  //const bot = botClient(testBotSource)
+
   // lets add one bot player for fun
   clients.push(bot)
 

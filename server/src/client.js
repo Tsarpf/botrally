@@ -1,3 +1,5 @@
+const Promise = require('bluebird')
+
 let client = socket => {
     let inputQueue = {q: []}
     socket.on('input', input => {
@@ -15,10 +17,12 @@ let client = socket => {
 }
 
 function getInputForFrame() {
-    if (this.inputQueue.q.length > 0) {
-        return this.inputQueue.q.pop()
-    }
-    return { leftDown: false, rightDown: false }
+    return new Promise((resolve, reject) => {
+        if (this.inputQueue.q.length > 0) {
+            resolve(this.inputQueue.q.pop())
+        }
+        resolve({ leftDown: false, rightDown: false })
+    })
 }
 
 function sendNewGame(newGameData) {
