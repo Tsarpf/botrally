@@ -3,8 +3,12 @@ import './style.scss';
 
 import carImgPath from './img/car.png'
 import io from 'socket.io-client'
+import settings from './settings.js'
 
-let socket = io('http://localhost:3000')
+// mabby don't do this tho?
+//import {selected} from './react/selection.jsx'
+
+let socket = io(settings.backend)
 
 document.querySelector('#app').innerHTML = '<h1> Hola! </h1>'
 

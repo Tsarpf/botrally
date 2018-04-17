@@ -43,6 +43,14 @@ module.exports = {
       {
         test: /\.(gif|svg|jpg|jpeg|png)$/,
         loader: "file-loader",
+      },
+      {
+        test: /.jsx?$/,
+        loader: 'babel-loader',
+        include: __dirname + '/src',
+        query: {
+          presets: ['es2015', 'react']
+        }
       }
     ],
     rules: [

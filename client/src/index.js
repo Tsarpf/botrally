@@ -1,5 +1,6 @@
-const networked = true
+import App from './react/app.jsx'
 
+const networked = true
 let game
 if(networked) {
   game = require('./network-game.js')

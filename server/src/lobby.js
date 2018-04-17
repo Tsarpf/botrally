@@ -8,6 +8,7 @@ function newClient(client) {
 }
 
 function checkIfShouldStartGame() {
+    waitingClients = waitingClients.filter(c => c.socket ? c.socket.connected : false)
     if(waitingClients.length >= clientsPerGame) {
         startNewGame(clientsPerGame)
     }

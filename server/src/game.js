@@ -197,7 +197,11 @@ function newGame(clients, cb) {
     let cars = []
     let winner
     clients.forEach(client => {
-      updateCar(client, tileGrid, map, settings, movingAllowed)
+      try {
+        updateCar(client, tileGrid, map, settings, movingAllowed)
+      } catch(e) {
+        console.log('updating failed', e)
+      }
 
       let xt = tile(client.car.x, settings.tileSize)
       let yt = tile(client.car.y, settings.tileSize)
