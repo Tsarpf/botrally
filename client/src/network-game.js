@@ -136,7 +136,6 @@ function initCar(ownCar, allCars) {
     let i = new Image()
     i.src = carImagePaths[idx]
     i.onload = () => {
-      console.log(car.idx, ownCar.idx)
       if(car.idx === ownCar.idx) {
         document.querySelector('#owncar').src = carImagePaths[idx]
       }
@@ -217,6 +216,14 @@ socket.on('new game', (settings) => {
 
 socket.on('state', car => {
   stateBuffer.push(car)
+})
+
+socket.on('botoutput', output => {
+  console.log('got bot output', output)
+  const text = `${JSON.stringify(output)}`
+  const p = document.createElement('p')
+  p.textContent = text
+  document.querySelector('#botoutput').insertBefore(p, document.querySelector('#botoutput').childNodes[0])
 })
 
 socket.on('end', car => {

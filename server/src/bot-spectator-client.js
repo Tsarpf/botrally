@@ -36,21 +36,30 @@ function sendWinner(winnerCar) {
     this.socket.emit('end', winnerCar)
 }
 
+function sendOutput(socket, error) {
+    socket.emit('botoutput', error)
+}
+
 module.exports = client
 
 const createScript = (source) => sbox.createScript("exports.main = function() {" + source + "}");
 
 function getInputForFrame(car, map, tileGrid, xt, yt, t, nt, degNext) {
+    let socket = this.socket
     return new Promise((resolve, reject) => {
         let script = createScript(this.source)
         script.on('exit', (err, output) => {
             if (err) {
+                sendOutput(socket, err)
                 reject(err)
             } else {
                 resolve(output)
             }
         })
-        script.on('timeout', () => reject('timeout'))
+        script.on('timeout', function () {
+            sendOutput(socket, 'script timed out')
+            reject('timeout')
+        })
         script.run({
             car,
             map,

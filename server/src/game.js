@@ -11,15 +11,15 @@ const presetMap = require('./placeholder-map.js').map
 const {getDriver} = require('./drivers.js')
 
 const mapSize = 10
-const tickrate = 30
+const tickrate = 50
 const tileSize = 50
 let carSize = {
   x: 50,
   y: 30
 }
 
-const carSpeedMultiplier = 2.5
-const rotationSpeed = Math.PI / 30
+const carSpeedMultiplier = 5.0
+const rotationSpeed = Math.PI / 25
 
 function initializeGrid(map, size) {
   let grid = new Array(mapSize)
@@ -34,6 +34,7 @@ function getIdx(x, y, size) {
 }
 
 function moveCar(car, carSpeed, leftDown, rightDown) {
+  if(!car) {return} //the function is sometimes called after game has ended and car has been destroyed... :)
   let rotation = car.rotation
   let xPos = car.x
   let yPos = car.y
@@ -173,7 +174,7 @@ async function updateCar(client, tileGrid, map, settings, movingAllowed) {
   try {
     input = await client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext)
   } catch(e) {
-    console.log('failed to get input', e)
+    //console.log('failed to get input', e)
   }
   let keys = fixBotShortHands(client, input)
 
@@ -239,7 +240,7 @@ async function newGame(clients, cb) {
   // lets add one bot player for fun
   const bot = botClient(testSandboxSource)
   //const bot = botClient(testBotSource)
-  clients.push(bot)
+  clients.unshift(bot)
 
 
   clients.forEach(client => {
