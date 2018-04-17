@@ -30,6 +30,7 @@ const rotationSpeed = Math.PI / 60
 let carImg
 let tileGrid
 let stateBuffer = []
+let ownCar
 
 function drawBackgroundGrid() {
   const sizeX = 501
@@ -101,7 +102,9 @@ function initializeGrid(map, size) {
   return grid
 }
 
-function initialize(mapSize, tSize, map, trate, carSize, carSPos) {
+function initialize(mapSize, tSize, map, trate, carSize, carSPos, car) {
+  ownCar = car
+  console.log(ownCar)
   stateBuffer = []
   tickrate = trate
   tileSize = tSize
@@ -196,10 +199,20 @@ window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
 drawBackgroundGrid()
 
-socket.on('new game', ({tickrate, map, mapSize, tileSize, carSize, carStartPos}) => {
-  initialize(mapSize, tileSize, map, tickrate, carSize, carStartPos)
+socket.on('new game', ({tickrate, map, mapSize, tileSize, carSize, carStartPos, car}) => {
+  initialize(mapSize, tileSize, map, tickrate, carSize, carStartPos, car)
 })
 
 socket.on('state', car => {
   stateBuffer.push(car)
+})
+
+socket.on('end', car => {
+  console.log(car)
+  if(car.idx === ownCar.idx) {
+    alert('you won')
+  } else {
+    alert(`car ${car.idx} won (not you :)`)
+  }
+  // somebody won
 })
