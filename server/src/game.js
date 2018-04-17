@@ -51,9 +51,69 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   car.setPosition(xPos, yPos)
 }
 
+const randomDir = () => ~~(Math.random() * 3) - 1;
+const clamp = (min, max, v) => Math.max(Math.min(max, v), min);
+
+function canPlaceTile(map, x, y, mapSize) {
+  const tileExists = map[getIdx(x, y, mapSize)];
+
+  let diagonalNeighbors = false;
+  /*if ((x >= 1 && x < mapSize - 1) && (y >= 1 && y < mapSize - 1))  {
+    diagonalNeighbors =
+         map[getIdx(x - 1, y - 1, mapSize)]
+      || map[getIdx(x + 1, y - 1, mapSize)]
+      || map[getIdx(x - 1, y + 1, mapSize)]
+      || map[getIdx(x + 1, y + 1, mapSize)];
+  }*/
+
+  return !(tileExists || diagonalNeighbors);
+}
+
+function generateTile(map, prevX, prevY) {
+  while (true) {
+    let xDir = randomDir();
+    let yDir = randomDir();
+
+    // no purely diagonal tiles
+    if (xDir != 0 && yDir != 0) {
+      if (Math.random() <= 0.5) {
+        xDir = 0;
+      } else {
+        yDir = 0;
+      }
+    }
+
+    let x = clamp(0, mapSize - 1, prevX + xDir);
+    let y = clamp(0, mapSize - 1, prevY + yDir);
+
+    if (canPlaceTile(map, x, y, mapSize)) {
+      return { x, y, type: "hurr durr" };
+    }
+  }
+}
+
 function generateMap() {
-  // NYI
-  return presetMap // just use map from file for now
+  let map = new Array(mapSize * mapSize);
+
+  map[0] = { x: 0, y: 0, type: "start"};
+
+  let finished = false;
+  let prevX = 0, prevY = 0;
+  let i = 0;
+
+  while (!finished) {
+    let tile = generateTile(map, prevX, prevY);
+    tile.type = "road";
+    map[getIdx(tile.x, tile.y, mapSize)] = tile;
+    i++;
+    finished = i >= 10;
+    prevX = tile.x;
+    prevY = tile.y;
+  }
+
+  map[getIdx(prevX, prevY, mapSize)].type = "end";
+
+  return map.filter(v => v);
 }
 
 
