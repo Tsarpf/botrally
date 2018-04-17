@@ -4,8 +4,8 @@ const Promise = require('bluebird')
 var sbox = new SandCastle({
     cwd: __dirname,
     /*api: __dirname + '/../lib/api.js',*/
-    memoryLimitMB: 500,
-    timeout: 100,
+    memoryLimitMB: 1000,
+    timeout: 1000,
 });
 
 let client = source => {

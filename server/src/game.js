@@ -224,15 +224,21 @@ function newGame(clients, cb) {
     mapSize,
     tileSize
   }
-  const bot = botClient(testSandboxSource)
-  //const bot = botClient(testBotSource)
 
   // lets add one bot player for fun
+  const bot = botClient(testSandboxSource)
+  //const bot = botClient(testBotSource)
   clients.push(bot)
 
+  let carStartPos = {x: carSize.x / 2, y: carSize.y / 2}
+
   clients.forEach(client => {
-    let carStartPos = {x: carSize.x / 2, y: carSize.y / 2}
     client.car = Car(carStartPos, 0)
+  })
+
+  const clientCars = clients.map(c => c.car)
+
+  clients.forEach(client => {
     client.sendNewGame({
       map: newMap,
       tickrate,
@@ -240,7 +246,8 @@ function newGame(clients, cb) {
       mapSize,
       carSize,
       carStartPos,
-      car: client.car
+      car: client.car,
+      allCars: clientCars
     })
   })
 

@@ -2,6 +2,11 @@
 import './style.scss';
 
 import carImgPath from './img/car.png'
+import carImgBlue from './img/car-blue.png'
+import carImgGreen from './img/car-green.png'
+import carImgPink from './img/car-pink.png'
+import carImgRed from './img/car-red.png'
+
 import io from 'socket.io-client'
 import settings from './settings.js'
 
@@ -19,16 +24,20 @@ const car_canvas = document.getElementById("car");
 const car_context = car_canvas.getContext("2d");
 let carSizeX = 50
 let carSizeY = 30
-let tileSize
-let mapSize
-let tickrate
-let carStartPos
+let g_tileSize
+let g_mapSize
+let g_tickrate
+let g_carStartPos
 const carSpeed = 2.0
 const rotationSpeed = Math.PI / 60
 let carImg
+let carImagePaths = [carImgPath, carImgBlue, carImgGreen, carImgPink, carImgRed]
+let carImgs = {}
 let tileGrid
 let stateBuffer = []
 let ownCar
+let ownCarImage
+let carImageMap = {}
 
 function drawBackgroundGrid() {
   const sizeX = 501
@@ -52,21 +61,21 @@ function drawBackgroundGrid() {
 
 function drawRoadTile(tile) {
   map_context.beginPath()
-  map_context.rect(tile.x * tileSize, tile.y * tileSize, 50, 50)
+  map_context.rect(tile.x * g_tileSize, tile.y * g_tileSize, 50, 50)
   map_context.fillStyle = "green"
   map_context.fill()
 }
 
 function drawStartTile(tile) {
   map_context.beginPath()
-  map_context.rect(tile.x * tileSize, tile.y * tileSize, 50, 50)
+  map_context.rect(tile.x * g_tileSize, tile.y * g_tileSize, 50, 50)
   map_context.fillStyle = "red"
   map_context.fill()
 }
 
 function drawEndTile(tile) {
   map_context.beginPath()
-  map_context.rect(tile.x * tileSize, tile.y * tileSize, 50, 50)
+  map_context.rect(tile.x * g_tileSize, tile.y * g_tileSize, 50, 50)
   map_context.fillStyle = "blue"
   map_context.fill()
 }
@@ -93,21 +102,22 @@ function getIdx(x, y, size) {
 }
 
 function initializeGrid(map, size) {
-  let grid = new Array(mapSize)
+  let grid = new Array(g_mapSize)
   map.forEach(tile => {
     grid[getIdx(tile.x, tile.y, size)] = tile
   })
   return grid
 }
 
-function initialize(mapSize, tSize, map, trate, carSize, carSPos, car) {
+function initialize({tickrate, map, mapSize, tileSize, carSize, carStartPos, car, allCars}) {
   ownCar = car
   stateBuffer = []
-  tickrate = trate
-  tileSize = tSize
+  g_tickrate = tickrate
+  g_tileSize = tileSize 
   carSizeX = carSize.x
   carSizeY = carSize.y
-  carStartPos = carSPos
+  g_carStartPos = carStartPos
+  g_mapSize = mapSize
   let grid = initializeGrid(map, mapSize)
 
   //lets just make it 'global' for now. ugly af
@@ -116,18 +126,26 @@ function initialize(mapSize, tSize, map, trate, carSize, carSPos, car) {
   map_context.clearRect(0, 0, map_canvas.width, map_canvas.height);  // clear canvas
   drawBackgroundGrid()
   drawTiles(map)
-  initCar()
+  initCar(ownCar, allCars)
 
-  setInterval(updateCar, tickrate)
+  setInterval(updateCar, g_tickrate)
 }
 
-function initCar() {
-  carImg = new Image()
-  carImg.src = carImgPath
-  carImg.onload = () => {
-    car_context.drawImage(carImg, 0, 0, carSizeX, carSizeY);
-    car_context.translate(carStartPos.x - carSizeX / 2, carStartPos.y - carSizeY / 2)
-  }
+function initCar(ownCar, allCars) {
+  allCars.forEach((car, idx) => {
+    let i = new Image()
+    i.src = carImagePaths[idx]
+    i.onload = () => {
+      console.log(car.idx, ownCar.idx)
+      if(car.idx === ownCar.idx) {
+        document.querySelector('#owncar').src = carImagePaths[idx]
+      }
+      car_context.drawImage(i, 0, 0, carSizeX, carSizeY)
+      car_context.translate(g_carStartPos.x - carSizeX / 2, g_carStartPos.y - carSizeY / 2)
+    }
+    car.image = i
+    carImageMap[car.idx] = i
+  })
 }
 
 let leftDown = false
@@ -167,13 +185,12 @@ function updateCar() {
   let state = stateBuffer.pop()
   if (state) {
     car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
-    state.forEach(car => drawCar(car))
+    state.forEach(car => drawCar(car, carImageMap[car.idx]))
   }
 }
 
-function drawCar(car) {
+function drawCar(car, img) {
   car_context.save()
-
 
   let xPos = car.x
   let yPos = car.y
@@ -182,14 +199,7 @@ function drawCar(car) {
   let rotation = car.rotation
   car_context.rotate(-rotation);
 
-
-  // Mabby TODO some forecasting?
-  //const xSpeed = Math.sin(rotation) * carSpeed
-  //const ySpeed = Math.cos(rotation) * carSpeed
-  //xPos += ySpeed
-  //yPos -= xSpeed
-
-  car_context.drawImage(carImg, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
+  car_context.drawImage(img, -carSizeX/2, -carSizeY/2, carSizeX, carSizeY);
 
   car_context.restore()
 }
@@ -197,9 +207,7 @@ function drawCar(car) {
 window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
 
-socket.on('new game', ({tickrate, map, mapSize, tileSize, carSize, carStartPos, car}) => {
-  initialize(mapSize, tileSize, map, tickrate, carSize, carStartPos, car)
-})
+socket.on('new game', (stuff) => console.log(stuff) || initialize(stuff)) 
 
 socket.on('state', car => {
   stateBuffer.push(car)
@@ -207,7 +215,7 @@ socket.on('state', car => {
 
 socket.on('end', car => {
   //reset to initial position
-  car_context.translate(-(carStartPos.x - carSizeX / 2), -(carStartPos.y - carSizeY / 2))
+  car_context.translate(-(g_carStartPos.x - carSizeX / 2), -(g_carStartPos.y - carSizeY / 2))
   if(car.idx === ownCar.idx) {
     document.querySelector('#app').innerHTML = `<h1> You won! </h1>`
   } else {
