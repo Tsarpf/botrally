@@ -109,6 +109,8 @@ function initialize(mapSize, tSize, map, trate, carSize, carSPos, car) {
   //lets just make it 'global' for now. ugly af
   tileGrid = grid
 
+  map_context.clearRect(0, 0, map_canvas.width, map_canvas.height);  // clear canvas
+  drawBackgroundGrid()
   drawTiles(map)
   initCar()
 
@@ -190,7 +192,6 @@ function drawCar(car) {
 
 window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
-drawBackgroundGrid()
 
 socket.on('new game', ({tickrate, map, mapSize, tileSize, carSize, carStartPos, car}) => {
   initialize(mapSize, tileSize, map, tickrate, carSize, carStartPos, car)
