@@ -16,7 +16,7 @@ function checkIfShouldStartGame() {
 function startNewGame(numPlayers) {
     let clients = waitingClients.splice(0, numPlayers)
 
-    console.log('starting new game with clients: ', clients, numPlayers)
+    console.log('starting new game with n clients: ', numPlayers)
 
     newGame(clients, clients => {
         clients.filter(c => c.socket ? c.socket.connected : false).forEach(c => newClient(c))

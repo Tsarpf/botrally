@@ -114,7 +114,7 @@ function updateCar(client, tileGrid, map, settings) {
 function endGame(clients, loopKey, winner, cb) {
     clients.forEach(c => {
       delete c.car
-      c.inputQueue = []
+      if (c.type === 'human') { c.inputQueue.q = [] }
       c.sendWinner(winner)
     })
     clearInterval(loopKey)

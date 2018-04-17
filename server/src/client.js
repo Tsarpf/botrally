@@ -1,7 +1,7 @@
 let client = socket => {
-    let inputQueue = []
+    let inputQueue = {q: []}
     socket.on('input', input => {
-        inputQueue.push(input)
+        inputQueue.q.push(input)
     })
     return {
         socket,
@@ -15,8 +15,8 @@ let client = socket => {
 }
 
 function getInputForFrame() {
-    if(this.inputQueue.length > 0) {
-        return this.inputQueue.pop()
+    if (this.inputQueue.q.length > 0) {
+        return this.inputQueue.q.pop()
     }
     return { leftDown: false, rightDown: false }
 }
