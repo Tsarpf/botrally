@@ -154,7 +154,7 @@ function fixBotShortHands(client, keys) {
   return keys
 }
 
-function updateCar(client, tileGrid, map, settings) {
+function updateCar(client, tileGrid, map, settings, movingAllowed) {
   let xt = tile(client.car.x, settings.tileSize)
   let yt = tile(client.car.y, settings.tileSize)
   let t = getTile(xt, yt, tileGrid, settings.mapSize)
@@ -168,6 +168,7 @@ function updateCar(client, tileGrid, map, settings) {
 
   let car = client.car
   let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
+  if(!movingAllowed) speed = 0
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
@@ -183,12 +184,13 @@ function endGame(clients, loopKey, winner, cb) {
 
 function newGame(clients, cb) {
   let loopKey
+  let movingAllowed = false
   const updateAllCars = (tileGrid, clients, map, settings) => () => {
     // tad wasteful to build the array on each frame, but whatever
     let cars = []
     let winner
     clients.forEach(client => {
-      updateCar(client, tileGrid, map, settings)
+      updateCar(client, tileGrid, map, settings, movingAllowed)
 
       let xt = tile(client.car.x, settings.tileSize)
       let yt = tile(client.car.y, settings.tileSize)
@@ -230,6 +232,7 @@ function newGame(clients, cb) {
   })
 
   loopKey = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
+  setTimeout(() => movingAllowed = true, 1000)
 }
 
 module.exports = {
