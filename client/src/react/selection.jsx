@@ -1,8 +1,8 @@
 import React from 'react'
 import settings from '../settings.js'
 
-const selected = {
-    bot: 'human'
+const driverSelection = {
+    driver: 'human'
 }
 
 class Selection extends React.Component {
@@ -12,16 +12,13 @@ class Selection extends React.Component {
     }
     componentDidMount() {
         const url = `${settings.backend}/bots`
-        console.log(url)
         fetch(url)
             .then(response => response.json())
             .then(json => this.setState({bots: json}))
     }
     render() {
         const bots = this.state.bots
-        console.log(bots)
-        return <select onChange={e=>alert('todo...' + e.target.value)}>
-            <option> human </option>
+        return <select onChange={e=>driverSelection.driver = e.target.value}>
             {bots.map(bot =>
                 <option key={bot}> {bot} </option>
             )}
@@ -35,6 +32,6 @@ export default Selection
 // but is that smart tho? 
 // Mabby just make a socket file with a send
 export {
-    selected, 
+    driverSelection, 
     Selection
 }

@@ -1,0 +1,1 @@
+{"human":"TODO: insert code for creating a human here","defaultbot":"if (t) {\r\n    if (!nt) exit({ ld: true, rd: false }) // if we lose the road, just spin around\r\n    if (degNext > car.rotationDeg) {\r\n        exit({ ld: true, rd: false })\r\n    } else if (degNext < car.rotationDeg) {\r\n        exit({ ld: false, rd: true })\r\n    }\r\n}\r\nexit()"}

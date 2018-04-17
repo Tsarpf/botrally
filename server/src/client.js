@@ -7,6 +7,7 @@ let client = socket => {
     })
     return {
         socket,
+        getDriver,
         sendNewGame,
         getInputForFrame,
         inputQueue,
@@ -27,6 +28,15 @@ function getInputForFrame() {
 
 function sendNewGame(newGameData) {
     this.socket.emit('new game', newGameData)
+}
+
+function getDriver() {
+    this.socket.emit('getdriver', 'plz')
+    return new Promise((resolve, reject) => {
+        this.socket.on('driver', driver => {
+            resolve({...driver, client: this})
+        })
+    })
 }
 
 function sendState(state) {

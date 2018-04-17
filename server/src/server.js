@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const {newClient} = require('./lobby.js')
 const client = require('./client.js')
 const cors = require('cors')
+const fs = require('fs')
+const {addDriver, drivers} = require('./drivers.js')
 
 app.use(bodyParser.json())
 app.use(cors())
@@ -13,12 +15,8 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
-let bots = {
-
-}
-
 app.get('/bots', (req, res) => {
-  res.send(Object.keys(bots))
+  res.send(Object.keys(drivers))
 })
 
 app.post('/new-bot', (req, res) => {
@@ -28,10 +26,12 @@ app.post('/new-bot', (req, res) => {
     console.log('no name or source')
     return res.sendStatus(400)
   }
-
-  if (!bots[name]) {
-    bots[name] = source
+  if(!source.length || source.length > 10000 || !name.length || name.length > 10000) {
+    console.log('too hueg')
+    return res.sendStatus(413)
   }
+  addDriver(req.body)
+
   res.end()
 })
 

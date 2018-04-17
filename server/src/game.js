@@ -2,9 +2,13 @@ const fs = require('fs')
 const testBotSource = require('./test-bot-source.js')
 const testSandboxSource = fs.readFileSync('./src/sandbox-test-bot.js', 'utf8')
 const botClient = require('./bot-client.js')
+const botSpectatorClient = require('./bot-spectator-client.js')
+const humanClient = require('./client.js')
 
 const Car = require('./car.js')
 const presetMap = require('./placeholder-map.js').map
+
+const {getDriver} = require('./drivers.js')
 
 const mapSize = 10
 const tickrate = 30
@@ -189,7 +193,7 @@ function endGame(clients, loopKey, winner, cb) {
     cb(clients)
 }
 
-function newGame(clients, cb) {
+async function newGame(clients, cb) {
   let loopKey
   let movingAllowed = false
   const updateAllCars = (tileGrid, clients, map, settings) => () => {
@@ -222,37 +226,53 @@ function newGame(clients, cb) {
 
   let settings = {
     mapSize,
-    tileSize
+    tileSize,
+    carStartPos: {x: carSize.x / 2, y: carSize.y / 2}
   }
 
-  // lets add one bot player for fun
-  const bot = botClient(testSandboxSource)
-  //const bot = botClient(testBotSource)
-  clients.push(bot)
+  const driverSelection = clients.map(c => c.getDriver())
 
-  let carStartPos = {x: carSize.x / 2, y: carSize.y / 2}
+  clients = (await Promise.all(driverSelection)).map(d => setupDriver(d))
+
+  // lets add one bot player for fun
+  //const bot = botClient(testSandboxSource)
+  //const bot = botClient(testBotSource)
+  //clients.push(bot)
+
 
   clients.forEach(client => {
-    client.car = Car(carStartPos, 0)
+    client.car = Car(settings.carStartPos, 0)
   })
 
   const clientCars = clients.map(c => c.car)
 
-  clients.forEach(client => {
+  console.log('clients', clients)
+
+  clients.forEach(client => 
     client.sendNewGame({
       map: newMap,
       tickrate,
       tileSize,
       mapSize,
       carSize,
-      carStartPos,
+      carStartPos: settings.carStartPos,
       car: client.car,
       allCars: clientCars
     })
-  })
-
+  )
   loopKey = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
   setTimeout(() => movingAllowed = true, 1000)
+}
+
+function setupDriver(d) {
+  if(d.driver !== 'human') {
+    return botSpectatorClient(getDriver(d.driver), d.client.socket)
+  }
+  if(d.driver === 'human') {
+    return humanClient(d.client.socket)
+  }
+  //clients = drivers.map(d => d.client)
+  return d.client
 }
 
 module.exports = {

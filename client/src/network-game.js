@@ -11,7 +11,7 @@ import io from 'socket.io-client'
 import settings from './settings.js'
 
 // mabby don't do this tho?
-//import {selected} from './react/selection.jsx'
+import {driverSelection} from './react/selection.jsx'
 
 let socket = io(settings.backend)
 
@@ -181,7 +181,7 @@ let yPos = 0
 let rotation = 0
 
 function updateCar() {
-  socket.emit('input', { leftDown, rightDown })
+  if(driverSelection.driver === 'human') { socket.emit('input', { leftDown, rightDown }) }
   let state = stateBuffer.pop()
   if (state) {
     car_context.clearRect(-carSizeX, -carSizeY, car_canvas.width + carSizeX, car_canvas.height + carSizeY);  // clear canvas
@@ -207,7 +207,13 @@ function drawCar(car, img) {
 window.addEventListener('keydown', checkKeyDown, false)
 window.addEventListener('keyup', checkKeyUp, false)
 
-socket.on('new game', (stuff) => console.log(stuff) || initialize(stuff)) 
+socket.on('getdriver', () => {
+  socket.emit('driver', driverSelection)
+}) 
+
+socket.on('new game', (settings) => {
+  initialize(settings)
+}) 
 
 socket.on('state', car => {
   stateBuffer.push(car)

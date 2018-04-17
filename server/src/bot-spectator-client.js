@@ -2,17 +2,41 @@ const Promise = require('bluebird')
 
 const sbox = require('./sandcastle.js')
 
-let client = source => {
+let client = (source, socket) => {
     return {
+        socket,
         source,
-        sendNewGame,
         getDriver,
+        sendNewGame,
         getInputForFrame,
         sendState,
         type: 'bot',
         sendWinner
     }
 }
+
+function sendNewGame(newGameData) {
+    this.socket.emit('new game', newGameData)
+}
+
+function getDriver() {
+    this.socket.emit('getdriver', 'plz')
+    return new Promise((resolve, reject) => {
+        this.socket.on('driver', driver => {
+            resolve({...driver, client: this})
+        })
+    })
+}
+
+function sendState(state) {
+    this.socket.emit('state', state)
+}
+
+function sendWinner(winnerCar) {
+    this.socket.emit('end', winnerCar)
+}
+
+module.exports = client
 
 const createScript = (source) => sbox.createScript("exports.main = function() {" + source + "}");
 
@@ -38,24 +62,6 @@ function getInputForFrame(car, map, tileGrid, xt, yt, t, nt, degNext) {
             degNext
         })
     })
-}
-
-function sendNewGame(newGameData) {
-    // should the bots have an initialization function?
-    // why bother tho?
-}
-
-function getDriver() {
-    return new Promise(r => r({driver: 'defaultbot', client: this}))
-}
-
-function sendState(state) {
-    // noop
-}
-
-function sendWinner(winner) {
-    console.log('somebody won', winner)
-    // noop
 }
 
 module.exports = client
