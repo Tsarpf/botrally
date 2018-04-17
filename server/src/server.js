@@ -32,7 +32,7 @@ app.post('/new-bot', (req, res) => {
   }
   addDriver(req.body)
 
-  res.end()
+  res.send('suksee')
 })
 
 io.on('connection', function(socket){
