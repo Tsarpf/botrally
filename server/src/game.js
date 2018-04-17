@@ -1,4 +1,4 @@
-const testBotSource = require('./test-bot-source.js').bot
+const testBotSource = require('./test-bot-source.js')
 const botClient = require('./bot-client.js')
 
 const Car = require('./car.js')
@@ -98,7 +98,7 @@ function updateCar(client, tileGrid, map, settings) {
   let degNext = nextAndDeg.degNext
 
   let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext)
-  keys = keys ? keys : {leftDown: false, rightDown: false}
+  keys = keys ? {leftDown: keys.ld, rightDown: keys.rd} : {leftDown: false, rightDown: false}
   let car = client.car
   let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
@@ -140,8 +140,7 @@ function newGame(clients, cb) {
     mapSize,
     tileSize
   }
-  const botSource = testBotSource(settings)
-  const bot = botClient(botSource)
+  const bot = botClient(testBotSource)
   // lets add one bot player for fun
   clients.push(bot)
 
