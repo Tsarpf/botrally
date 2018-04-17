@@ -8,10 +8,3 @@ module.exports = (car, map, grid, xt, yt, t, nt, degNext) => {
         }
     }
 }
-
-
-
-
-// API ideas:
-// - function that tells which part of the road we're now
-// -

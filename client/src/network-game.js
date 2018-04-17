@@ -98,7 +98,6 @@ function initializeGrid(map, size) {
 
 function initialize(mapSize, tSize, map, trate, carSize, carSPos, car) {
   ownCar = car
-  console.log(ownCar)
   stateBuffer = []
   tickrate = trate
   tileSize = tSize

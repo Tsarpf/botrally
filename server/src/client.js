@@ -18,10 +18,7 @@ function getInputForFrame() {
     if(this.inputQueue.length > 0) {
         return this.inputQueue.pop()
     }
-    console.log('no input')
-    //return null
     return { leftDown: false, rightDown: false }
-    // NYI wait for input
 }
 
 function sendNewGame(newGameData) {

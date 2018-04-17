@@ -105,7 +105,11 @@ function updateCar(client, tileGrid, map, settings) {
 }
 
 function endGame(clients, loopKey, winner, cb) {
-    clients.forEach(c => c.sendWinner(winner))
+    clients.forEach(c => {
+      delete c.car
+      c.inputQueue = []
+      c.sendWinner(winner)
+    })
     clearInterval(loopKey)
     cb(clients)
 }
@@ -158,7 +162,6 @@ function newGame(clients, cb) {
     })
   })
 
-  // NYI end game loop
   loopKey = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
 }
 
