@@ -195,6 +195,7 @@ function endGame(clients, loopKey, winner, cb) {
 
 async function newGame(clients, cb) {
   let loopKey
+  let endTimer
   let movingAllowed = false
   const updateAllCars = (tileGrid, clients, map, settings) => () => {
     // tad wasteful to build the array on each frame, but whatever
@@ -215,6 +216,7 @@ async function newGame(clients, cb) {
       cars.push(client.car)
     })
     if (winner) { 
+      clearTimeout(endTimer)
       endGame(clients, loopKey, winner, cb)
     } else {
       clients.forEach(client => client.sendState(cars))
@@ -235,9 +237,9 @@ async function newGame(clients, cb) {
   clients = (await Promise.all(driverSelection)).map(d => setupDriver(d))
 
   // lets add one bot player for fun
-  //const bot = botClient(testSandboxSource)
+  const bot = botClient(testSandboxSource)
   //const bot = botClient(testBotSource)
-  //clients.push(bot)
+  clients.push(bot)
 
 
   clients.forEach(client => {
@@ -245,8 +247,6 @@ async function newGame(clients, cb) {
   })
 
   const clientCars = clients.map(c => c.car)
-
-  console.log('clients', clients)
 
   clients.forEach(client => 
     client.sendNewGame({
@@ -262,6 +262,7 @@ async function newGame(clients, cb) {
   )
   loopKey = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
   setTimeout(() => movingAllowed = true, 1000)
+  endTimer = setTimeout(() => endGame(clients, loopKey, null, cb), 60000)
 }
 
 function setupDriver(d) {
