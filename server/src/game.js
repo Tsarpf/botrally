@@ -87,6 +87,13 @@ function getDegToNextTile(xt, yt, t, map) {
   return {nt: nextTile, degNext: deg}
 }
 
+function fixBotShortHands(client, keys) {
+  if(client.type === 'bot') {
+    keys = keys ? {leftDown: keys.ld, rightDown: keys.rd} : {leftDown: false, rightDown: false}
+  }
+  return keys
+}
+
 function updateCar(client, tileGrid, map, settings) {
   let xt = tile(client.car.x, settings.tileSize)
   let yt = tile(client.car.y, settings.tileSize)
@@ -97,8 +104,8 @@ function updateCar(client, tileGrid, map, settings) {
   let nt = nextAndDeg.nt
   let degNext = nextAndDeg.degNext
 
-  let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext)
-  keys = keys ? {leftDown: keys.ld, rightDown: keys.rd} : {leftDown: false, rightDown: false}
+  let keys = fixBotShortHands(client, client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext))
+
   let car = client.car
   let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
