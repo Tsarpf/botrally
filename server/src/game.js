@@ -145,7 +145,7 @@ function getDegToNextTile(xt, yt, t, map) {
     idx++
   }
   idx++
-  if (!map[idx]) return { leftDown: true, rightDown: false } // if we lose the road, just spin around
+  if (!map[idx]) return {}
   const nextTile = map[idx]
   const rad = Math.atan2(nextTile.x - xt, nextTile.y - yt)
   const deg = rad * (180 / Math.PI) - 90 // -90 because we want towards right to be 0
