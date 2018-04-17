@@ -84,7 +84,13 @@ function updateCar(client, tileGrid, map, settings) {
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
-function newGame(clients) {
+function endGame(clients, loopKey, winner, cb) {
+    clients.forEach(c => c.sendWinner(winner))
+    clearInterval(loopKey)
+    cb(clients)
+}
+
+function newGame(clients, cb) {
   let loopKey
   const updateAllCars = (tileGrid, clients, map, settings) => () => {
     // tad wasteful to build the array on each frame, but whatever
@@ -101,8 +107,7 @@ function newGame(clients) {
       cars.push(client.car)
     })
     if (winner) { 
-      clients.forEach(c => c.sendWinner(winner))
-      clearInterval(loopKey)
+      endGame(clients, loopKey, winner, cb)
     } else {
       clients.forEach(client => client.sendState(cars))
     } 

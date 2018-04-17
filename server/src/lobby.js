@@ -18,7 +18,9 @@ function startNewGame(numPlayers) {
 
     console.log('starting new game with clients: ', clients, numPlayers)
 
-    newGame(clients)
+    newGame(clients, clients => {
+        clients.filter(c => c.socket ? c.socket.connected : false).forEach(c => newClient(c))
+    })
 }
 
 

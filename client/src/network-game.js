@@ -6,13 +6,7 @@ import io from 'socket.io-client'
 
 let socket = io('http://localhost:3000')
 
-// randomly using ES7 object rest spread because it currently raises
-// an error in all browsers, but can be transpiled by Babel
-const { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 }
-const n = { x, y, ...z }
-if (Object.keys(n).map((key) => n[key]).reduce((p, v) => p + v) === 10) {
-  document.querySelector('#app').insertAdjacentHTML('afterbegin', '<h1>hola.</h1>')
-}
+document.querySelector('#app').innerHTML = '<h1> Hola! </h1>'
 
 // These ugly globals tho. Fix later... :)
 const map_canvas = document.getElementById("map");
@@ -208,11 +202,12 @@ socket.on('state', car => {
 })
 
 socket.on('end', car => {
-  console.log(car)
+  //reset to initial position
+  car_context.translate(-carStartPos.x, -carStartPos.y)
   if(car.idx === ownCar.idx) {
-    alert('you won')
+    document.querySelector('#app').innerHTML = `<h1> You won! </h1>`
   } else {
-    alert(`car ${car.idx} won (not you :)`)
+    document.querySelector('#app').innerHTML = `<h1> car ${car.idx} won (not you :) </h1>`
   }
   // somebody won
 })
