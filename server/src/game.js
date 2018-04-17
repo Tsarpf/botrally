@@ -72,13 +72,33 @@ function getCarSpeed(xTile, yTile, mapSize, tileGrid) {
 const getTile = (x, y, grid, size) => grid[getIdx(x, y, size)]
 const tile = (pos, tileSize) => ~~(pos / tileSize)
 
+function getDegToNextTile(xt, yt, t, map) {
+  if (!t) return {}
+
+  let idx = 0
+  while (map[idx] !== t) {
+    idx++
+  }
+  idx++
+  if (!map[idx]) return { leftDown: true, rightDown: false } // if we lose the road, just spin around
+  const nextTile = map[idx]
+  const rad = Math.atan2(nextTile.x - xt, nextTile.y - yt)
+  const deg = rad * (180 / Math.PI) - 90 // -90 because we want towards right to be 0
+  return {nt: nextTile, degNext: deg}
+}
+
 function updateCar(client, tileGrid, map, settings) {
   let xt = tile(client.car.x, settings.tileSize)
   let yt = tile(client.car.y, settings.tileSize)
   let t = getTile(xt, yt, tileGrid, settings.mapSize)
   client.car.rotationDeg = (client.car.rotation / Math.PI / 2 * 360) % 360
+  
+  let nextAndDeg = getDegToNextTile(xt, yt, t, map)
+  let nt = nextAndDeg.nt
+  let degNext = nextAndDeg.degNext
 
-  let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t)
+  let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t, nt, degNext)
+  keys = keys ? keys : {leftDown: false, rightDown: false}
   let car = client.car
   let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)

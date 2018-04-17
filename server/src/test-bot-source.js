@@ -1,24 +1,13 @@
 const bot = settings => {
-    return (car, map, grid, xt, yt, t) => {
+    return (car, map, grid, xt, yt, t, nt, degNext) => {
         if (t) {
-            let idx = 0
-            while(map[idx] !== t) {
-                idx++
-            }
-            idx++
-            if(!map[idx]) return { leftDown: true, rightDown: false } // if we lose the road, just spin around
-            const nextTile = map[idx]
-            const rad = Math.atan2(nextTile.x - xt, nextTile.y - yt)
-            const deg = rad * (180 / Math.PI) - 90 // -90 because we want towards right to be 0
-            if(deg > car.rotationDeg) {
+            if (!nt) return { leftDown: true, rightDown: false } // if we lose the road, just spin around
+            if (degNext > car.rotationDeg) {
                 return { leftDown: true, rightDown: false }
-            } else if (deg < car.rotationDeg){
-                return { leftDown: false, rightDown: true}
-            } else {
-                return { leftDown: false, rightDown: false }
+            } else if (degNext < car.rotationDeg) {
+                return { leftDown: false, rightDown: true }
             }
         }
-        return { leftDown: true, rightDown: false }
     }
 }
 
