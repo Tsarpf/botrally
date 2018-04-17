@@ -56,9 +56,14 @@ function generateMap() {
   return presetMap // just use map from file for now
 }
 
-function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
-  const xTile = ~~(xPos / tileSize)
-  const yTile = ~~(yPos / tileSize)
+
+function checkVictoryCondition(xTile, yTile, mapSize, tileGrid) {
+  const idx = getIdx(xTile, yTile, mapSize)
+  const tile = tileGrid[idx]
+  return tile ? tile.type === 'end' ? true : false : false
+}
+
+function getCarSpeed(xTile, yTile, mapSize, tileGrid) {
   const idx = getIdx(xTile, yTile, mapSize)
   const tile = tileGrid[idx]
   return tile ? 0.7 : 0.35
@@ -66,6 +71,7 @@ function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
 
 const getTile = (x, y, grid, size) => grid[getIdx(x, y, size)]
 const tile = (pos, tileSize) => ~~(pos / tileSize)
+
 function updateCar(client, tileGrid, map, settings) {
   let xt = tile(client.car.x, settings.tileSize)
   let yt = tile(client.car.y, settings.tileSize)
@@ -74,21 +80,33 @@ function updateCar(client, tileGrid, map, settings) {
 
   let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t)
   let car = client.car
-  let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid) * carSpeedMultiplier
+  let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
-const updateAllCars = (tileGrid, clients, map, settings) => () => {
-  // tad wasteful to build the array on each frame, but whatever
-  let cars = []
-  clients.forEach(client => {
-    updateCar(client, tileGrid, map, settings)
-    cars.push(client.car)
-  })
-  clients.forEach(client => client.sendState(cars))
-}
-
 function newGame(clients) {
+  let loopKey
+  const updateAllCars = (tileGrid, clients, map, settings) => () => {
+    // tad wasteful to build the array on each frame, but whatever
+    let cars = []
+    let winner
+    clients.forEach(client => {
+      updateCar(client, tileGrid, map, settings)
+
+      let xt = tile(client.car.x, settings.tileSize)
+      let yt = tile(client.car.y, settings.tileSize)
+      if (checkVictoryCondition(xt, yt, settings.mapSize, tileGrid)) {
+        winner = client.car
+      }
+      cars.push(client.car)
+    })
+    if (winner) { 
+      clients.forEach(c => c.sendWinner(winner))
+      clearInterval(loopKey)
+    } else {
+      clients.forEach(client => client.sendState(cars))
+    } 
+  }
 
   let newMap = generateMap()
   let grid = initializeGrid(newMap, mapSize)
@@ -112,11 +130,12 @@ function newGame(clients) {
       mapSize,
       carSize,
       carStartPos,
+      car: client.car
     })
   })
 
   // NYI end game loop
-  const key = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
+  loopKey = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
 }
 
 module.exports = {

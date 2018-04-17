@@ -1,7 +1,3 @@
-// TODO: get map specs as a parameter
-const mapSize = 10
-const tileSize = 50
-
 const bot = settings => {
     return (car, map, grid, xt, yt, t) => {
         if (t) {

@@ -9,7 +9,8 @@ let client = socket => {
         getInputForFrame,
         inputQueue,
         sendState,
-        type: 'human'
+        type: 'human',
+        sendWinner
     }
 }
 
@@ -29,6 +30,10 @@ function sendNewGame(newGameData) {
 
 function sendState(state) {
     this.socket.emit('state', state)
+}
+
+function sendWinner(winnerCar) {
+    this.socket.emit('end', winnerCar)
 }
 
 module.exports = client

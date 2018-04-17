@@ -4,7 +4,8 @@ let client = source => {
         sendNewGame,
         getInputForFrame,
         sendState,
-        type: 'bot'
+        type: 'bot',
+        sendWinner
     }
 }
 
@@ -18,6 +19,11 @@ function sendNewGame(newGameData) {
 }
 
 function sendState(state) {
+    // noop
+}
+
+function sendWinner(winner) {
+    console.log('somebody won', winner)
     // noop
 }
 
