@@ -3,28 +3,26 @@ const mapSize = 10
 const tileSize = 50
 
 const bot = settings => {
-    const tile = (pos, tileSize) => ~~(pos / tileSize)
-    const getIdx = (x, y, size) => {
-        return y * size + x
-    }
-    const getTile = (x, y) => grid[getIdx(x, y)]
-    return (car, map, grid, settings) => {
-        let xt = tile(car.x, settings.tileSize)
-        let yt = tile(car.y, settings.tileSize)
-        let t = getTile(xt, yt, settings.mapSize)
+    return (car, map, grid, xt, yt, t) => {
         if (t) {
             let idx = 0
             while(map[idx] !== t) {
                 idx++
             }
             idx++
-            console.log('next tile is ', map[idx])
-
-            // TODO: compute angle to next tile
-            // TODO: turn towards if angle is not 0
+            if(!map[idx]) return { leftDown: true, rightDown: false } // if we lose the road, just spin around
+            const nextTile = map[idx]
+            const rad = Math.atan2(nextTile.x - xt, nextTile.y - yt)
+            const deg = rad * (180 / Math.PI) - 90 // -90 because we want towards right to be 0
+            if(deg > car.rotationDeg) {
+                return { leftDown: true, rightDown: false }
+            } else if (deg < car.rotationDeg){
+                return { leftDown: false, rightDown: true}
+            } else {
+                return { leftDown: false, rightDown: false }
+            }
         }
-
-        return { leftDown: false, rightDown: false }
+        return { leftDown: true, rightDown: false }
     }
 }
 

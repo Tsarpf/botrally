@@ -25,7 +25,7 @@ function initializeGrid(map, size) {
 }
 
 function getIdx(x, y, size) {
-  return y * size +x
+  return y * size + x
 }
 
 function moveCar(car, carSpeed, leftDown, rightDown) {
@@ -64,18 +64,25 @@ function getCarSpeed(xPos, yPos, mapSize, tileGrid) {
   return tile ? 0.7 : 0.35
 }
 
-function updateCar(client, tileGrid, map) {
-  let keys = client.getInputForFrame(client.car, map, tileGrid)
+const getTile = (x, y, grid, size) => grid[getIdx(x, y, size)]
+const tile = (pos, tileSize) => ~~(pos / tileSize)
+function updateCar(client, tileGrid, map, settings) {
+  let xt = tile(client.car.x, settings.tileSize)
+  let yt = tile(client.car.y, settings.tileSize)
+  let t = getTile(xt, yt, tileGrid, settings.mapSize)
+  client.car.rotationDeg = (client.car.rotation / Math.PI / 2 * 360) % 360
+
+  let keys = client.getInputForFrame(client.car, map, tileGrid, xt, yt, t)
   let car = client.car
   let speed = getCarSpeed(car.x, car.y, mapSize, tileGrid) * carSpeedMultiplier
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
 
-const updateAllCars = (tileGrid, clients, map) => () => {
+const updateAllCars = (tileGrid, clients, map, settings) => () => {
   // tad wasteful to build the array on each frame, but whatever
   let cars = []
   clients.forEach(client => {
-    updateCar(client, tileGrid, map)
+    updateCar(client, tileGrid, map, settings)
     cars.push(client.car)
   })
   clients.forEach(client => client.sendState(cars))
@@ -109,7 +116,7 @@ function newGame(clients) {
   })
 
   // NYI end game loop
-  const key = setInterval(updateAllCars(grid, clients, newMap), tickrate)
+  const key = setInterval(updateAllCars(grid, clients, newMap, settings), tickrate)
 }
 
 module.exports = {
