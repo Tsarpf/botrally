@@ -122,7 +122,7 @@ function initCar() {
   carImg.src = carImgPath
   carImg.onload = () => {
     car_context.drawImage(carImg, 0, 0, carSizeX, carSizeY);
-    car_context.translate(carStartPos.x, carStartPos.y)
+    car_context.translate(carStartPos.x - carSizeX / 2, carStartPos.y - carSizeY / 2)
   }
 }
 
@@ -203,7 +203,7 @@ socket.on('state', car => {
 
 socket.on('end', car => {
   //reset to initial position
-  car_context.translate(-carStartPos.x, -carStartPos.y)
+  car_context.translate(-(carStartPos.x - carSizeX / 2), -(carStartPos.y - carSizeY / 2))
   if(car.idx === ownCar.idx) {
     document.querySelector('#app').innerHTML = `<h1> You won! </h1>`
   } else {
