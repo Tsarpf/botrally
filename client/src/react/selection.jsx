@@ -7,6 +7,7 @@ const driverSelection = {
 
 const tutorial = [
 'keyboard left/right arrow to turn when human selected, changes to driver from dropdown only affect next game.',
+'game starts when there are 2 players available (so open a second tab if you have no friends). one defaultbot is always added',
 'game autorestarts at 60 seconds if no winners',
 'there is a one second wait at beginning of the game',
 'to add new bots: !+addbot botname <bot source code>. After a page refresh the bot is selectable from the dropdown menu',
