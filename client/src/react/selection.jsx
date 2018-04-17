@@ -9,8 +9,8 @@ const tutorial = [
 'keyboard left/right arrow to turn when human selected, changes to driver from dropdown only affect next game.',
 'game autorestarts at 60 seconds if no winners',
 'there is a one second wait at beginning of the game',
-'to add new bots: !+addbot botname <bot source code>',
-`bot AI:s have no state, and should exit {ld: true/false, rd: true/false} (ld/rd stands for leftDown/rightDown)`,
+'to add new bots: !+addbot botname <bot source code>. After a page refresh the bot is selectable from the dropdown menu',
+`bot AI:s have no state, and should exit({ld: true/false, rd: true/false}) (ld/rd stands for leftDown/rightDown)`,
 
 `bots have access to variables, for example:`,
 `car = {x: 1.53, y: 1.57, rotation: 5.6, rotationDeg: 274} (rotationDeg wraps at 360, rotation never wraps)`,
