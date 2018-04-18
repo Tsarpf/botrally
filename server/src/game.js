@@ -10,20 +10,20 @@ const presetMap = require('./placeholder-map.js').map
 
 const {getDriver} = require('./drivers.js')
 
-const carSpeedRoad = 9.0
-const carSpeedOffRoad = 7.0
-const dragMultiplier = 0.5
+const carAccRoad = 1.25
+const carAccOffRoad = 1.10
+const dragMultiplier = 1.20
 const mapSize = 10
 const tickrate = 50
 const tileSize = 50
-const mapMax = mapSize * tileSize
+const mapMax = mapSize * tileSize - tileSize / 2
 let carSize = {
   x: 50,
   y: 30
 }
 
 const carSpeedMultiplier = 0.1
-const rotationSpeed = Math.PI / 25
+const rotationSpeed = Math.PI / 20
 
 function initializeGrid(map, size) {
   let grid = new Array(mapSize)
@@ -37,27 +37,31 @@ function getIdx(x, y, size) {
   return y * size + x
 }
 
-function addDrag(car, carSpeed) {
+function addDrag(car, carSpeed, velocity) {
   const drag = carSpeed * dragMultiplier
   if(car.velocity.x > 0) {
-     car.velocity.x -= 1/carSpeed * dragMultiplier 
+     //car.velocity.x -= 1/carSpeed * dragMultiplier - car.velocity.x
+     car.velocity.x -= 1/carSpeed * dragMultiplier
      if(car.velocity.x < 0) {
        car.velocity.x = 0
      }
   } else if(car.velocity.x < 0) {
-    car.velocity.x += 1/carSpeed * dragMultiplier 
+    //car.velocity.x += 1/carSpeed * dragMultiplier + car.velocity.x
+    car.velocity.x += 1/carSpeed * dragMultiplier
      if(car.velocity.x > 0) {
        car.velocity.x = 0
      }
   }
 
   if(car.velocity.y > 0) {
-     car.velocity.y -= 1/carSpeed * dragMultiplier 
+     //car.velocity.y -= 1/carSpeed * dragMultiplier - car.velocity.y  
+     car.velocity.y -= 1/carSpeed * dragMultiplier
      if(car.velocity.y < 0) {
        car.velocity.y = 0
      }
   } else if(car.velocity.y < 0) {
-    car.velocity.y += 1/carSpeed * dragMultiplier 
+    //car.velocity.y += 1/carSpeed * dragMultiplier + car.velocity.y
+    car.velocity.y += 1/carSpeed * dragMultiplier
      if(car.velocity.y > 0) {
        car.velocity.y = 0
      }
@@ -80,12 +84,24 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   }
   car.setRotation(rotation);
 
-  addDrag(car, carSpeed)
 
-  car.velocity.x = car.velocity.x + Math.sin(rotation) * carSpeed
-  car.velocity.y = car.velocity.y + Math.cos(rotation) * carSpeed
-  xPos += car.velocity.y
-  yPos -= car.velocity.x
+  //const ratio = Math.abs(Math.sin(rotation) / Math.cos(rotation))
+  const ratio = Math.sin(rotation) / Math.cos(rotation)
+  addDrag(car, carSpeed, car.velocity)
+
+  let xmul = Math.cos(rotation)
+  const xmul2 = Math.sqrt(Math.abs(xmul))
+  xmul = xmul > 0 ? xmul2 : -xmul2
+
+  let ymul = Math.sin(rotation)
+  const ymul2 = Math.sqrt(Math.abs(ymul))
+  ymul = ymul > 0 ? ymul2 : -ymul2
+
+  car.velocity.x = car.velocity.x + xmul * carSpeed
+  car.velocity.y = car.velocity.y + ymul * carSpeed
+
+  xPos += car.velocity.x
+  yPos -= car.velocity.y
 
   if(xPos < 0) xPos = 0
   if(yPos < 0) yPos = 0
@@ -188,7 +204,7 @@ function checkVictoryCondition(xTile, yTile, mapSize, tileGrid) {
 function getCarSpeed(xTile, yTile, mapSize, tileGrid) {
   const idx = getIdx(xTile, yTile, mapSize)
   const tile = tileGrid[idx]
-  return tile ? carSpeedRoad : carSpeedOffRoad 
+  return tile ? carAccRoad : carAccOffRoad 
 }
 
 const getTile = (x, y, grid, size) => grid[getIdx(x, y, size)]
@@ -235,7 +251,7 @@ async function updateCar(client, tileGrid, map, settings, movingAllowed) {
   let keys = fixBotShortHands(client, input)
 
   let car = client.car
-  let speed = getCarSpeed(xt, yt, mapSize, tileGrid) * carSpeedMultiplier
+  let speed = getCarSpeed(xt, yt, mapSize, tileGrid)
   if(!movingAllowed) speed = 0
   moveCar(car, speed, keys.leftDown, keys.rightDown)
 }
