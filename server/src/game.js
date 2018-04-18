@@ -16,6 +16,7 @@ const dragMultiplier = 0.5
 const mapSize = 10
 const tickrate = 50
 const tileSize = 50
+const mapMax = mapSize * tileSize
 let carSize = {
   x: 50,
   y: 30
@@ -85,6 +86,12 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   car.velocity.y = car.velocity.y + Math.cos(rotation) * carSpeed
   xPos += car.velocity.y
   yPos -= car.velocity.x
+
+  if(xPos < 0) xPos = 0
+  if(yPos < 0) yPos = 0
+
+  if(xPos > mapMax) xPos = mapMax
+  if(yPos > mapMax) yPos = mapMax
 
   car.setPosition(xPos, yPos)
 }
