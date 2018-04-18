@@ -61,22 +61,21 @@ const randomDir = () => ~~(Math.random() * 3) - 1;
 const clamp = (min, max, v) => Math.max(Math.min(max, v), min);
 
 function canPlaceTile(map, x, y, mapSize) {
-  const tileExists = map[getIdx(x, y, mapSize)];
+  if (x < 0 || x >= mapSize || y < 0 || y >= mapSize) {
+    // out of bounds
+    return false;
+  }
 
-  let diagonalNeighbors = false;
-  /*if ((x >= 1 && x < mapSize - 1) && (y >= 1 && y < mapSize - 1))  {
-    diagonalNeighbors =
-         map[getIdx(x - 1, y - 1, mapSize)]
-      || map[getIdx(x + 1, y - 1, mapSize)]
-      || map[getIdx(x - 1, y + 1, mapSize)]
-      || map[getIdx(x + 1, y + 1, mapSize)];
-  }*/
+  if(map[getIdx(x, y, mapSize)]) {
+    // tile exists
+    return false;
+  }
 
-  return !(tileExists || diagonalNeighbors);
+  return true;
 }
 
 function generateTile(map, prevX, prevY) {
-  while (true) {
+  for (let i = 0; i < 10; i++) {
     let xDir = randomDir();
     let yDir = randomDir();
 
@@ -89,37 +88,55 @@ function generateTile(map, prevX, prevY) {
       }
     }
 
-    let x = clamp(0, mapSize - 1, prevX + xDir);
-    let y = clamp(0, mapSize - 1, prevY + yDir);
+    let x = prevX + xDir;
+    let y = prevY + yDir;
 
     if (canPlaceTile(map, x, y, mapSize)) {
       return { x, y, type: "hurr durr" };
     }
   }
+
+  // fuck it, can't put anything here
+  return null;
 }
+
+const tileDistance = (tile) => Math.sqrt(tile.x * tile.x + tile.y * tile.y);
 
 function generateMap() {
   let map = new Array(mapSize * mapSize);
 
   map[0] = { x: 0, y: 0, type: "start"};
 
-  let finished = false;
   let prevX = 0, prevY = 0;
-  let i = 0;
 
-  while (!finished) {
+  while (true) {
     let tile = generateTile(map, prevX, prevY);
+
+    if (!tile) {
+      break;
+    }
+
     tile.type = "road";
     map[getIdx(tile.x, tile.y, mapSize)] = tile;
-    i++;
-    finished = i >= 10;
     prevX = tile.x;
     prevY = tile.y;
   }
 
-  map[getIdx(prevX, prevY, mapSize)].type = "end";
+  map = map.filter(v => v);
+  let maxDistance = 0;
+  let mostDistantTile = null;
 
-  return map.filter(v => v);
+  for (let tile of map) {
+    let curDistance = tileDistance(tile);
+    if (curDistance > maxDistance) {
+      mostDistantTile = tile;
+      maxDistance = curDistance;
+    }
+  }
+
+  mostDistantTile.type = "end";
+
+  return map;
 }
 
 
@@ -224,7 +241,7 @@ async function newGame(clients, cb) {
     } 
   }
 
-  let newMap = presetMap//generateMap()
+  let newMap = generateMap()
   let grid = initializeGrid(newMap, mapSize)
 
   let settings = {
