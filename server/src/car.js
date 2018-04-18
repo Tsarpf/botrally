@@ -6,7 +6,8 @@ const car = (startPosition, startRotation) => {
         x: startPosition.x,
         y: startPosition.y,
         setPosition,
-        setRotation
+        setRotation,
+        velocity: {x: 0, y: 0}
     }
 }
 

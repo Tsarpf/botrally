@@ -10,6 +10,9 @@ const presetMap = require('./placeholder-map.js').map
 
 const {getDriver} = require('./drivers.js')
 
+const carSpeedRoad = 9.0
+const carSpeedOffRoad = 7.0
+const dragMultiplier = 0.5
 const mapSize = 10
 const tickrate = 50
 const tileSize = 50
@@ -18,7 +21,7 @@ let carSize = {
   y: 30
 }
 
-const carSpeedMultiplier = 5.0
+const carSpeedMultiplier = 0.1
 const rotationSpeed = Math.PI / 25
 
 function initializeGrid(map, size) {
@@ -31,6 +34,33 @@ function initializeGrid(map, size) {
 
 function getIdx(x, y, size) {
   return y * size + x
+}
+
+function addDrag(car, carSpeed) {
+  const drag = carSpeed * dragMultiplier
+  if(car.velocity.x > 0) {
+     car.velocity.x -= 1/carSpeed * dragMultiplier 
+     if(car.velocity.x < 0) {
+       car.velocity.x = 0
+     }
+  } else if(car.velocity.x < 0) {
+    car.velocity.x += 1/carSpeed * dragMultiplier 
+     if(car.velocity.x > 0) {
+       car.velocity.x = 0
+     }
+  }
+
+  if(car.velocity.y > 0) {
+     car.velocity.y -= 1/carSpeed * dragMultiplier 
+     if(car.velocity.y < 0) {
+       car.velocity.y = 0
+     }
+  } else if(car.velocity.y < 0) {
+    car.velocity.y += 1/carSpeed * dragMultiplier 
+     if(car.velocity.y > 0) {
+       car.velocity.y = 0
+     }
+  }
 }
 
 function moveCar(car, carSpeed, leftDown, rightDown) {
@@ -49,10 +79,12 @@ function moveCar(car, carSpeed, leftDown, rightDown) {
   }
   car.setRotation(rotation);
 
-  const xSpeed = Math.sin(rotation) * carSpeed
-  const ySpeed = Math.cos(rotation) * carSpeed
-  xPos += ySpeed
-  yPos -= xSpeed
+  addDrag(car, carSpeed)
+
+  car.velocity.x = car.velocity.x + Math.sin(rotation) * carSpeed
+  car.velocity.y = car.velocity.y + Math.cos(rotation) * carSpeed
+  xPos += car.velocity.y
+  yPos -= car.velocity.x
 
   car.setPosition(xPos, yPos)
 }
@@ -149,7 +181,7 @@ function checkVictoryCondition(xTile, yTile, mapSize, tileGrid) {
 function getCarSpeed(xTile, yTile, mapSize, tileGrid) {
   const idx = getIdx(xTile, yTile, mapSize)
   const tile = tileGrid[idx]
-  return tile ? 0.7 : 0.35
+  return tile ? carSpeedRoad : carSpeedOffRoad 
 }
 
 const getTile = (x, y, grid, size) => grid[getIdx(x, y, size)]
