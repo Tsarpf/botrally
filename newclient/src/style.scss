@@ -1,0 +1,17 @@
+$font-stack:    Helvetica, sans-serif;
+$primary-color: #333;
+
+body {
+  font: 100% $font-stack;
+  color: $primary-color;
+}
+
+#car {
+  position: absolute;
+  width: 501px; height: 501px;
+}
+#map {
+  position: absolute;
+  width: 501px; height: 501px;
+}
+
